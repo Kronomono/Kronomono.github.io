@@ -58,15 +58,15 @@ body.intro-active { overflow: hidden; }
   pointer-events: none;
 }
 
-/* === JOKER IMAGE — starts visible on right, slides in SECOND === */
+/* === JOKER IMAGE — slides in SECOND, takes up right ~55%, anchored center-right === */
 #intro-bg {
   position: absolute;
-  right: 0;
+  right: -2%;
   top: 0;
   height: 100%;
-  width: 45%;
+  width: 58%;
   object-fit: cover;
-  object-position: left center;
+  object-position: 20% center;
   z-index: 1;
   transform: translateX(110%);
   opacity: 0;
@@ -83,12 +83,11 @@ body.intro-active { overflow: hidden; }
 /* === DIALOGUE BANNER — animates FIRST, slides in from left === */
 #intro-banner {
   position: absolute;
-  /* Vertically centered, spanning the left ~60% of screen */
-  left: 50%;
+  left: 5%;
   top: 50%;
-  transform: translate(-80%, -50%) translateX(-120%) scaleX(0.3);
+  transform: translateY(-50%) translateX(-110%) scaleX(0.2);
   transform-origin: left center;
-  width: clamp(420px, 55vw, 800px);
+  width: clamp(480px, 58vw, 860px);
   z-index: 3;
   opacity: 0;
   pointer-events: none;
@@ -97,43 +96,43 @@ body.intro-active { overflow: hidden; }
   animation: bannerSlideIn 0.45s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 @keyframes bannerSlideIn {
-  0%   { opacity: 0; transform: translate(-80%, -50%) translateX(-120%) scaleX(0.3); }
+  0%   { opacity: 0; transform: translateY(-50%) translateX(-110%) scaleX(0.2); }
   40%  { opacity: 1; }
-  100% { opacity: 1; transform: translate(-80%, -50%) translateX(0)      scaleX(1);   }
+  100% { opacity: 1; transform: translateY(-50%) translateX(0)      scaleX(1);  }
 }
 
 /* Hide the dialogue text overlay — text is baked into the banner image */
 #intro-dialogue-text { display: none; }
 
-/* === RESPONSE OPTIONS — positioned in lower-center, next to Joker === */
+/* === RESPONSE OPTIONS — centered on screen, large and prominent === */
 #intro-choices {
   position: absolute;
-  /* Sit horizontally around center, bottom third of screen */
   left: 50%;
-  bottom: 14%;
-  transform: translateX(-70%);
+  bottom: 10%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 1rem;
   z-index: 5;
   pointer-events: none;
   opacity: 0;
+  align-items: center;
 }
 #intro-choices.anim-choices {
   animation: choicesFadeUp 0.4s ease forwards;
   pointer-events: all;
 }
 @keyframes choicesFadeUp {
-  0%   { opacity: 0; transform: translateX(-70%) translateY(16px); }
-  100% { opacity: 1; transform: translateX(-70%) translateY(0); }
+  0%   { opacity: 0; transform: translateX(-50%) translateY(18px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 .choice-option {
   position: relative;
   display: flex;
   align-items: center;
-  width: clamp(260px, 30vw, 460px);
-  height: clamp(48px, 6.5vw, 72px);
+  width: clamp(360px, 38vw, 600px);
+  height: clamp(60px, 8vw, 90px);
   cursor: none;
   text-decoration: none;
 }
@@ -155,10 +154,10 @@ body.intro-active { overflow: hidden; }
   position: relative;
   z-index: 2;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(1rem, 1.8vw, 1.5rem);
-  letter-spacing: .2em;
+  font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+  letter-spacing: .25em;
   color: #fff;
-  padding-left: 14%;
+  padding-left: 13%;
   padding-bottom: 3px;
   transition: color 0.1s;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
