@@ -38,7 +38,7 @@ body.intro-active { overflow: hidden; }
   position: fixed;
   inset: 0;
   z-index: 8000;
-  background: #c8001a; /* P5 red */
+  background: #c8001a;
   overflow: hidden;
 }
 
@@ -58,109 +58,63 @@ body.intro-active { overflow: hidden; }
   pointer-events: none;
 }
 
-/* === JOKER IMAGE — slides in from right === */
+/* === JOKER IMAGE — starts visible on right, slides in SECOND === */
 #intro-bg {
   position: absolute;
-  right: -5%;
+  right: 0;
   top: 0;
   height: 100%;
-  width: 55%;
+  width: 45%;
   object-fit: cover;
   object-position: left center;
   z-index: 1;
-  transform: translateX(120%);
+  transform: translateX(110%);
   opacity: 0;
 }
-/* Phase 1: Joker slides in */
 #intro-bg.anim-joker {
-  animation: jokerSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+  animation: jokerSlideIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 @keyframes jokerSlideIn {
-  0%   { transform: translateX(120%); opacity: 0; }
-  60%  { opacity: 1; }
-  100% { transform: translateX(0);   opacity: 1; }
+  0%   { transform: translateX(110%); opacity: 0; }
+  50%  { opacity: 1; }
+  100% { transform: translateX(0);    opacity: 1; }
 }
 
-/* === DIALOGUE BANNER — P5 style wipe in === */
+/* === DIALOGUE BANNER — animates FIRST, slides in from left === */
 #intro-banner {
   position: absolute;
-  left: 3%;
+  /* Vertically centered, spanning the left ~60% of screen */
+  left: 50%;
   top: 50%;
-  transform: translateY(-50%) scaleX(0);
+  transform: translate(-80%, -50%) translateX(-120%) scaleX(0.3);
   transform-origin: left center;
-  width: clamp(280px, 42vw, 580px);
+  width: clamp(420px, 55vw, 800px);
   z-index: 3;
-  opacity: 1;
+  opacity: 0;
   pointer-events: none;
 }
 #intro-banner.anim-banner {
-  animation: bannerWipe 0.4s cubic-bezier(0.22,1,0.36,1) 0s forwards;
+  animation: bannerSlideIn 0.45s cubic-bezier(0.22,1,0.36,1) forwards;
 }
-@keyframes bannerWipe {
-  0%   { transform: translateY(-50%) scaleX(0); }
-  100% { transform: translateY(-50%) scaleX(1); }
-}
-
-/* Text typewriter overlay on top of banner */
-#intro-dialogue-text {
-  position: absolute;
-  left: 3%;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 4;
-  pointer-events: none;
-  width: clamp(280px, 42vw, 580px);
-  padding: 0 0 0 18%;
-  opacity: 0;
-}
-#intro-dialogue-text.anim-text {
-  animation: textFadeIn 0.1s ease 0s forwards;
-}
-@keyframes textFadeIn {
-  to { opacity: 1; }
-}
-.dialogue-name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(0.7rem, 1.4vw, 1rem);
-  letter-spacing: .3em;
-  color: #000;
-  display: block;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  width: 0;
-}
-.dialogue-name.typing {
-  animation: typeOut 0.4s steps(20, end) forwards;
-}
-@keyframes typeOut {
-  to { width: 100%; }
-}
-.dialogue-msg {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: clamp(0.75rem, 1.5vw, 1.05rem);
-  color: #000;
-  letter-spacing: .04em;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  width: 0;
-}
-.dialogue-msg.typing {
-  animation: typeFull 0.5s steps(22, end) forwards;
-}
-@keyframes typeFull {
-  to { width: 100%; }
+@keyframes bannerSlideIn {
+  0%   { opacity: 0; transform: translate(-80%, -50%) translateX(-120%) scaleX(0.3); }
+  40%  { opacity: 1; }
+  100% { opacity: 1; transform: translate(-80%, -50%) translateX(0)      scaleX(1);   }
 }
 
-/* === RESPONSE OPTIONS === */
+/* Hide the dialogue text overlay — text is baked into the banner image */
+#intro-dialogue-text { display: none; }
+
+/* === RESPONSE OPTIONS — positioned in lower-center, next to Joker === */
 #intro-choices {
   position: absolute;
-  left: 3%;
-  bottom: 12%;
+  /* Sit horizontally around center, bottom third of screen */
+  left: 50%;
+  bottom: 14%;
+  transform: translateX(-70%);
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.8rem;
   z-index: 5;
   pointer-events: none;
   opacity: 0;
@@ -170,16 +124,16 @@ body.intro-active { overflow: hidden; }
   pointer-events: all;
 }
 @keyframes choicesFadeUp {
-  0%   { opacity: 0; transform: translateY(14px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0%   { opacity: 0; transform: translateX(-70%) translateY(16px); }
+  100% { opacity: 1; transform: translateX(-70%) translateY(0); }
 }
 
 .choice-option {
   position: relative;
   display: flex;
   align-items: center;
-  width: clamp(200px, 28vw, 380px);
-  height: clamp(38px, 5vw, 56px);
+  width: clamp(260px, 30vw, 460px);
+  height: clamp(48px, 6.5vw, 72px);
   cursor: none;
   text-decoration: none;
 }
@@ -201,11 +155,11 @@ body.intro-active { overflow: hidden; }
   position: relative;
   z-index: 2;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(0.85rem, 1.5vw, 1.2rem);
+  font-size: clamp(1rem, 1.8vw, 1.5rem);
   letter-spacing: .2em;
   color: #fff;
   padding-left: 14%;
-  padding-bottom: 2px;
+  padding-bottom: 3px;
   transition: color 0.1s;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
   white-space: nowrap;
@@ -653,46 +607,27 @@ document.querySelectorAll('.reveal,.exp-item').forEach(el=>obs.observe(el));
 const introWrapper  = document.getElementById('intro-wrapper');
 const introBg       = document.getElementById('intro-bg');
 const introBanner   = document.getElementById('intro-banner');
-const introText     = document.getElementById('intro-dialogue-text');
 const introChoices  = document.getElementById('intro-choices');
-const dialogueName  = document.querySelector('.dialogue-name');
-const dialogueMsg   = document.querySelector('.dialogue-msg');
 
 document.body.classList.add('intro-active');
 
 function runIntroSequence() {
-  // Step 1 (0ms): Joker slides in from the right
-  introBg.classList.add('anim-joker');
+  // Step 1 (0ms): Banner image slides in from left
+  introBanner.classList.add('anim-banner');
 
-  // Step 2 (500ms): Banner wipes in
+  // Step 2 (550ms): Joker slides in from right
   setTimeout(() => {
-    introBanner.classList.add('anim-banner');
-  }, 500);
+    introBg.classList.add('anim-joker');
+  }, 550);
 
-  // Step 3 (800ms): Text container fades in, then name types out
-  setTimeout(() => {
-    introText.classList.add('anim-text');
-    dialogueName.classList.add('typing');
-  }, 800);
-
-  // Step 4 (1250ms): Welcome message types out
-  setTimeout(() => {
-    dialogueMsg.classList.add('typing');
-  }, 1250);
-
-  // Step 5 (1900ms): Response choices slide up
+  // Step 3 (1150ms): Response choices fade up
   setTimeout(() => {
     introChoices.classList.add('anim-choices');
-  }, 1900);
+  }, 1150);
 }
 
-// Start immediately (image may already be cached)
-if (introBg.complete && introBg.naturalWidth > 0) {
-  runIntroSequence();
-} else {
-  introBg.addEventListener('load', runIntroSequence, { once: true });
-  introBg.addEventListener('error', runIntroSequence, { once: true }); // fallback even if image missing
-}
+// Run on page load (no image dependency needed — start immediately)
+runIntroSequence();
 
 function exitIntro(cb) {
   introWrapper.classList.add('exit-wipe');
