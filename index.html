@@ -36,45 +36,42 @@ body::after { content:'';position:fixed;inset:0;background-image:url("data:image
   z-index: 800;
   pointer-events: none;
   overflow: hidden;
+  /* skew the whole container so the reveal edges are diagonal */
+  transform: skewX(-10deg);
 }
 
-/* The actual image fills the whole screen as a dramatic diagonal slash */
 #cutin-img {
   position: absolute;
-  /* Stretch across full screen, slightly oversized so skew doesn't leave gaps */
-  width: 130vw;
+  width: 140vw;
   height: 100vh;
-  left: -15vw;
+  left: -20vw;
   top: 0;
   object-fit: cover;
   object-position: center;
-  opacity: 0;
-  transform: translateX(-110%) skewX(-12deg);
   pointer-events: none;
+  /* CSS chroma-key: multiply blend knocks out bright green against black page */
+  mix-blend-mode: multiply;
+  /* Boost contrast so the remaining image pops */
+  filter: contrast(1.15) saturate(1.1);
+  /* Start fully clipped (zero width reveal) */
+  clip-path: inset(0 100% 0 0);
+  animation: none;
 }
 
-/* State: visible */
+/* SHOW: wipe in from left → hold → wipe out to right */
 #cutin-overlay.show #cutin-img {
-  animation: cutInAnim 1.6s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation: cutInWipe 1.8s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 
-/* State: hiding */
-#cutin-overlay.hide #cutin-img {
-  animation: cutOutAnim 0.4s ease forwards;
-}
-
-@keyframes cutInAnim {
-  0%   { opacity:0;  transform: translateX(-110%) skewX(-12deg); }
-  12%  { opacity:1;  transform: translateX(3%)    skewX(-8deg); }
-  20%  { opacity:1;  transform: translateX(-1%)   skewX(-6deg); }
-  28%  { opacity:1;  transform: translateX(0%)    skewX(-6deg); }
-  68%  { opacity:1;  transform: translateX(0%)    skewX(-6deg); }
-  100% { opacity:0;  transform: translateX(0%)    skewX(-6deg); }
-}
-
-@keyframes cutOutAnim {
-  0%   { opacity:1; transform: translateX(0%)   skewX(-6deg); }
-  100% { opacity:0; transform: translateX(110%) skewX(-6deg); }
+@keyframes cutInWipe {
+  /* Phase 1: rapid wipe IN (left edge fixed at 0, right edge sweeps from 100%→0%) */
+  0%   { clip-path: inset(0 100% 0 0); }   /* fully hidden */
+  18%  { clip-path: inset(0 0%   0 0); }   /* fully revealed */
+  /* Phase 2: hold */
+  62%  { clip-path: inset(0 0%   0 0); }
+  /* Phase 3: wipe OUT (left edge sweeps from 0%→100%, right stays at 0%) */
+  80%  { clip-path: inset(0 0% 0 0%);  }
+  100% { clip-path: inset(0 0% 0 100%); }  /* wiped off to the right */
 }
 
 /* Flash effect */
@@ -87,10 +84,10 @@ body::after { content:'';position:fixed;inset:0;background-image:url("data:image
   pointer-events: none;
 }
 #cutin-flash.flash {
-  animation: flashAnim 0.3s ease forwards;
+  animation: flashAnim 0.25s ease forwards;
 }
 @keyframes flashAnim {
-  0%   { opacity: 0.85; }
+  0%   { opacity: 0.9; }
   100% { opacity: 0; }
 }
 
@@ -270,7 +267,6 @@ nav a:hover::after { width:100%; }
 
 <!-- CUT-IN OVERLAY -->
 <div id="cutin-overlay">
-  <canvas id="cutin-canvas" style="display:none"></canvas>
   <img id="cutin-img" src="assets/cut_in.png" alt="" />
 </div>
 <div id="cutin-flash"></div>
@@ -495,82 +491,35 @@ const obs = new IntersectionObserver(entries=>{
 },{threshold:0.12});
 document.querySelectorAll('.reveal,.exp-item').forEach(el=>obs.observe(el));
 
-// ===== GREEN SCREEN REMOVAL (chroma key via canvas) =====
-const cutinImg = document.getElementById('cutin-img');
-const cutinCanvas = document.getElementById('cutin-canvas');
-
-function removeGreenScreen(img) {
-  const canvas = document.createElement('canvas');
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const data = imageData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i], g = data[i+1], b = data[i+2];
-    // Remove green: green must be dominant and bright
-    if (g > 100 && g > r * 1.4 && g > b * 1.4) {
-      data[i+3] = 0; // fully transparent
-    }
-  }
-  ctx.putImageData(imageData, 0, 0);
-  return canvas.toDataURL();
-}
-
-// Process once image loads
-cutinImg.addEventListener('load', () => {
-  try {
-    const processed = removeGreenScreen(cutinImg);
-    cutinImg.src = processed;
-  } catch(e) {
-    // CORS fallback — just show with CSS filter
-    cutinImg.style.filter = 'saturate(1.2)';
-  }
-});
-// If already cached/loaded
-if (cutinImg.complete && cutinImg.naturalWidth > 0) {
-  try {
-    const processed = removeGreenScreen(cutinImg);
-    cutinImg.src = processed;
-  } catch(e) {}
-}
-
 // ===== CUT-IN ANIMATION on nav click =====
 const cutinOverlay = document.getElementById('cutin-overlay');
 const cutinFlash   = document.getElementById('cutin-flash');
+const cutinImg     = document.getElementById('cutin-img');
 let cutinTimer = null;
 
 function triggerCutIn() {
-  // Clear any existing timer
   if (cutinTimer) clearTimeout(cutinTimer);
 
-  // Reset
-  cutinOverlay.classList.remove('show','hide');
+  // Reset everything
+  cutinOverlay.classList.remove('show');
   cutinFlash.classList.remove('flash');
+  void cutinOverlay.offsetWidth; // force reflow
 
-  // Force reflow
-  void cutinOverlay.offsetWidth;
-
-  // Flash
+  // White flash first
   cutinFlash.classList.add('flash');
 
-  // Show cut-in
+  // Wipe in
   cutinOverlay.classList.add('show');
 
-  // Auto-hide after animation (1.4s total in keyframe)
+  // Clean up after animation finishes (1.8s)
   cutinTimer = setTimeout(() => {
     cutinOverlay.classList.remove('show');
-    cutinOverlay.classList.add('hide');
-    setTimeout(() => cutinOverlay.classList.remove('hide'), 400);
-  }, 1400);
+  }, 1900);
 }
 
 // Attach to all nav links
 document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', (e) => {
-    triggerCutIn();
-  });
+  link.addEventListener('click', () => triggerCutIn());
 });
 </script>
 </body>
