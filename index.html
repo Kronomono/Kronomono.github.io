@@ -29,67 +29,7 @@ body {
 /* NOISE */
 body::after { content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:.6; }
 
-/* ===================== CUT-IN OVERLAY ===================== */
-#cutin-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 800;
-  pointer-events: none;
-  overflow: hidden;
-  /* skew the whole container so the reveal edges are diagonal */
-  transform: skewX(-10deg);
-}
 
-#cutin-img {
-  position: absolute;
-  width: 140vw;
-  height: 100vh;
-  left: -20vw;
-  top: 0;
-  object-fit: cover;
-  object-position: center;
-  pointer-events: none;
-  /* CSS chroma-key: multiply blend knocks out bright green against black page */
-  mix-blend-mode: multiply;
-  /* Boost contrast so the remaining image pops */
-  filter: contrast(1.15) saturate(1.1);
-  /* Start fully clipped (zero width reveal) */
-  clip-path: inset(0 100% 0 0);
-  animation: none;
-}
-
-/* SHOW: wipe in from left → hold → wipe out to right */
-#cutin-overlay.show #cutin-img {
-  animation: cutInWipe 1.8s cubic-bezier(0.22,1,0.36,1) forwards;
-}
-
-@keyframes cutInWipe {
-  /* Phase 1: rapid wipe IN (left edge fixed at 0, right edge sweeps from 100%→0%) */
-  0%   { clip-path: inset(0 100% 0 0); }   /* fully hidden */
-  18%  { clip-path: inset(0 0%   0 0); }   /* fully revealed */
-  /* Phase 2: hold */
-  62%  { clip-path: inset(0 0%   0 0); }
-  /* Phase 3: wipe OUT (left edge sweeps from 0%→100%, right stays at 0%) */
-  80%  { clip-path: inset(0 0% 0 0%);  }
-  100% { clip-path: inset(0 0% 0 100%); }  /* wiped off to the right */
-}
-
-/* Flash effect */
-#cutin-flash {
-  position: fixed;
-  inset: 0;
-  background: white;
-  z-index: 799;
-  opacity: 0;
-  pointer-events: none;
-}
-#cutin-flash.flash {
-  animation: flashAnim 0.25s ease forwards;
-}
-@keyframes flashAnim {
-  0%   { opacity: 0.9; }
-  100% { opacity: 0; }
-}
 
 /* ===================== HERO ===================== */
 #hero {
@@ -259,17 +199,12 @@ nav a:hover::after { width:100%; }
   .about-grid { grid-template-columns:1fr; }
   nav { gap:1rem;padding:1rem; }
   nav a { font-size:.75rem; }
-  #cutin-img { width: 150vw; left: -25vw; }
+
 }
 </style>
 </head>
 <body>
 
-<!-- CUT-IN OVERLAY -->
-<div id="cutin-overlay">
-  <img id="cutin-img" src="assets/cut_in.png" alt="" />
-</div>
-<div id="cutin-flash"></div>
 
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
@@ -491,36 +426,9 @@ const obs = new IntersectionObserver(entries=>{
 },{threshold:0.12});
 document.querySelectorAll('.reveal,.exp-item').forEach(el=>obs.observe(el));
 
-// ===== CUT-IN ANIMATION on nav click =====
-const cutinOverlay = document.getElementById('cutin-overlay');
-const cutinFlash   = document.getElementById('cutin-flash');
-const cutinImg     = document.getElementById('cutin-img');
-let cutinTimer = null;
 
-function triggerCutIn() {
-  if (cutinTimer) clearTimeout(cutinTimer);
+// Attach to all nav links (no-op kept for future use)
 
-  // Reset everything
-  cutinOverlay.classList.remove('show');
-  cutinFlash.classList.remove('flash');
-  void cutinOverlay.offsetWidth; // force reflow
-
-  // White flash first
-  cutinFlash.classList.add('flash');
-
-  // Wipe in
-  cutinOverlay.classList.add('show');
-
-  // Clean up after animation finishes (1.8s)
-  cutinTimer = setTimeout(() => {
-    cutinOverlay.classList.remove('show');
-  }, 1900);
-}
-
-// Attach to all nav links
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => triggerCutIn());
-});
 </script>
 </body>
 </html>
