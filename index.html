@@ -31,173 +31,114 @@ body::after { content:'';position:fixed;inset:0;background-image:url("data:image
 
 
 
-/* ===================== INTRO SCREENS ===================== */
+/* ===================== INTRO SCREEN ===================== */
+body.intro-active { overflow: hidden; }
+
 #intro-wrapper {
   position: fixed;
   inset: 0;
   z-index: 8000;
   background: #000;
-}
-
-/* Lock scroll while intro is active */
-body.intro-active { overflow: hidden; }
-
-/* --- PHASE 1: GIF --- */
-#intro-gif-screen {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000;
-  cursor: pointer;
-  transition: opacity 0.6s ease;
-}
-#intro-gif-screen img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-#intro-gif-screen .click-hint {
-  position: absolute;
-  bottom: 2.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1rem;
-  letter-spacing: .5em;
-  color: rgba(255,255,255,0.5);
-  animation: hintPulse 2s ease-in-out infinite;
-}
-@keyframes hintPulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.9; }
-}
-
-/* --- PHASE 2: JOKER SPLASH --- */
-#intro-splash-screen {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
   overflow: hidden;
 }
-#intro-splash-screen.visible {
-  opacity: 1;
-  pointer-events: all;
-}
-#intro-splash-screen img {
+
+/* Joker background template */
+#intro-bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: right center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
 }
-/* dramatic vignette */
-#intro-splash-screen::before {
-  content: '';
+#intro-bg.loaded { opacity: 1; }
+
+/* Welcome banner — centered left half of screen, slightly low */
+#intro-banner {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%);
-  z-index: 1;
+  left: 2%;
+  bottom: 38%;
+  width: clamp(320px, 52vw, 700px);
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.6s 0.6s ease, transform 0.6s 0.6s ease;
+  pointer-events: none;
+  z-index: 3;
 }
-/* bottom gradient to frame the button area */
-#intro-splash-screen::after {
-  content: '';
+#intro-bg.loaded ~ #intro-banner {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Dialogue choice box — Persona 5 style */
+#intro-choices {
   position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 45%;
-  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);
-  z-index: 1;
-}
-.splash-content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
+  left: 3%;
+  bottom: 10%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  height: 100%;
-  padding-bottom: 5vh;
-}
-.splash-eyecatch {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: clamp(.65rem, 1.2vw, .85rem);
-  letter-spacing: .45em;
-  color: var(--red);
-  margin-bottom: 1rem;
+  gap: 0.6rem;
+  z-index: 4;
   opacity: 0;
   transform: translateY(10px);
-  transition: opacity .6s .2s ease, transform .6s .2s ease;
+  transition: opacity 0.5s 1s ease, transform 0.5s 1s ease;
 }
-#intro-splash-screen.visible .splash-eyecatch {
+#intro-bg.loaded ~ #intro-banner ~ #intro-choices {
   opacity: 1;
   transform: translateY(0);
 }
-.splash-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(3rem, 8vw, 7rem);
-  line-height: .9;
-  color: var(--white);
-  letter-spacing: .06em;
-  text-shadow: 0 0 60px rgba(232,0,28,.5), 0 4px 30px rgba(0,0,0,1);
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity .7s .35s ease, transform .7s .35s ease;
-}
-#intro-splash-screen.visible .splash-title {
-  opacity: 1;
-  transform: translateY(0);
-}
-.splash-title span { color: var(--red); }
-.enter-btn {
-  margin-top: 2.5rem;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.15rem;
-  letter-spacing: .45em;
-  color: var(--black);
-  background: var(--red);
-  border: none;
-  padding: .85rem 3.5rem;
-  cursor: none;
-  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+
+.choice-option {
   position: relative;
-  overflow: hidden;
-  transition: transform .2s, filter .2s;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity .7s .55s ease, transform .7s .55s ease;
+  display: flex;
+  align-items: center;
+  width: clamp(220px, 32vw, 420px);
+  height: clamp(36px, 5.5vw, 58px);
+  cursor: none;
+  text-decoration: none;
+  transition: filter 0.15s;
 }
-#intro-splash-screen.visible .enter-btn {
-  opacity: 1;
-  transform: translateY(0);
-}
-.enter-btn:hover { filter: brightness(1.15); transform: translateX(6px) !important; }
-.enter-btn::before {
-  content: '';
+
+/* The arrow shape image — black version default, white on hover */
+.choice-option .arrow-black,
+.choice-option .arrow-white {
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.15);
-  transform: translateX(-100%) skewX(-20deg);
-  transition: transform .4s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  transition: opacity 0.15s;
 }
-.enter-btn:hover::before { transform: translateX(200%) skewX(-20deg); }
+.choice-option .arrow-black { opacity: 1; }
+.choice-option .arrow-white { opacity: 0; }
 
-/* --- EXIT TRANSITION --- */
+.choice-option:hover .arrow-black { opacity: 0; }
+.choice-option:hover .arrow-white { opacity: 1; }
+
+.choice-label {
+  position: relative;
+  z-index: 2;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(0.85rem, 1.6vw, 1.3rem);
+  letter-spacing: .18em;
+  color: #fff;
+  padding-left: 10%;
+  padding-bottom: 2px;
+  transition: color 0.15s;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+  white-space: nowrap;
+}
+.choice-option:hover .choice-label { color: #000; text-shadow: none; }
+
+/* EXIT TRANSITION */
 #intro-wrapper.exit-left {
-  animation: introExit .7s cubic-bezier(0.76,0,0.24,1) forwards;
+  animation: introExit 0.65s cubic-bezier(0.76,0,0.24,1) forwards;
 }
 @keyframes introExit {
-  0%   { transform: translateX(0);    opacity: 1; }
-  100% { transform: translateX(-100%); opacity: 0; }
+  0%   { clip-path: inset(0 0 0 0); opacity: 1; }
+  100% { clip-path: inset(0 100% 0 0); opacity: 0.2; }
 }
 
 /* ===================== HERO ===================== */
@@ -378,22 +319,30 @@ nav a:hover::after { width:100%; }
 <!-- ===== INTRO WRAPPER ===== -->
 <div id="intro-wrapper">
 
-  <!-- Phase 1: GIF fullscreen -->
-  <div id="intro-gif-screen">
-    <img src="assets/489f2ef203831fde7ac57378a16e86f4.gif" alt="Intro" />
-    <span class="click-hint">// CLICK TO CONTINUE</span>
-  </div>
+  <!-- Joker character background -->
+  <img id="intro-bg" src="assets/joker_template.png" alt="" />
 
-  <!-- Phase 2: Joker splash + enter button -->
-  <div id="intro-splash-screen">
-    <img src="assets/joker.jpg" alt="Joker" />
-    <div class="splash-content">
-      <div class="splash-eyecatch">// CODENAME: PHANTOM CODER</div>
-      <div class="splash-title">Phakeo<br><span>Arou</span>ne<br>rangsy</div>
-      <button class="enter-btn" id="enter-btn">ENTER THE METAVERSE →</button>
-    </div>
-  </div>
+  <!-- Welcome banner (name + welcome text) -->
+  <img id="intro-banner" src="assets/Phakeo_Arounerangsy-Welcome_to_my_website.png" alt="Welcome" />
 
+  <!-- Dialogue choices -->
+  <div id="intro-choices">
+
+    <!-- Option 1: More about me -->
+    <a href="#about" class="choice-option" id="choice-about">
+      <img class="arrow-black" src="assets/response_png_black.png" alt="" />
+      <img class="arrow-white" src="assets/response_png_white.png" alt="" />
+      <span class="choice-label">More about me</span>
+    </a>
+
+    <!-- Option 2: GitHub -->
+    <a href="https://github.com/Kronomono" target="_blank" class="choice-option" id="choice-github">
+      <img class="arrow-black" src="assets/response_png_black.png" alt="" />
+      <img class="arrow-white" src="assets/response_png_white.png" alt="" />
+      <span class="choice-label">Github</span>
+    </a>
+
+  </div>
 </div>
 <!-- ===== END INTRO ===== -->
 
@@ -619,39 +568,46 @@ document.querySelectorAll('.reveal,.exp-item').forEach(el=>obs.observe(el));
 
 
 // ===== INTRO SEQUENCE =====
-const introWrapper     = document.getElementById('intro-wrapper');
-const gifScreen        = document.getElementById('intro-gif-screen');
-const splashScreen     = document.getElementById('intro-splash-screen');
-const enterBtn         = document.getElementById('enter-btn');
+const introWrapper = document.getElementById('intro-wrapper');
+const introBg      = document.getElementById('intro-bg');
 
-// Lock scroll
 document.body.classList.add('intro-active');
 
-// Phase 1 → Phase 2: click the GIF screen
-gifScreen.addEventListener('click', () => {
-  // Fade out GIF screen
-  gifScreen.style.opacity = '0';
-  gifScreen.style.pointerEvents = 'none';
+// Trigger the fade-in cascade once the bg image loads
+introBg.addEventListener('load', () => introBg.classList.add('loaded'));
+// If already cached
+if (introBg.complete) introBg.classList.add('loaded');
 
-  // Fade in splash screen
-  setTimeout(() => {
-    splashScreen.classList.add('visible');
-  }, 300);
-});
-
-// Phase 2 → Main site: click ENTER button
-enterBtn.addEventListener('click', () => {
+function exitIntro(cb) {
   introWrapper.classList.add('exit-left');
-  // After animation ends, remove the intro entirely and unlock scroll
   introWrapper.addEventListener('animationend', () => {
     introWrapper.remove();
     document.body.classList.remove('intro-active');
+    if (cb) cb();
   }, { once: true });
+}
+
+// "More about me" — slide intro out then scroll to #about
+document.getElementById('choice-about').addEventListener('click', (e) => {
+  e.preventDefault();
+  exitIntro(() => {
+    document.querySelector('#about').scrollIntoView({ behavior: 'smooth' });
+  });
 });
 
-// Make enter button grow cursor
-enterBtn.addEventListener('mouseenter', () => { cur.style.width='26px'; cur.style.height='26px'; });
-enterBtn.addEventListener('mouseleave', () => { cur.style.width='14px'; cur.style.height='14px'; });
+// "Github" — slide intro out then open GitHub in new tab
+document.getElementById('choice-github').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.open('https://github.com/Kronomono', '_blank');
+  exitIntro();
+});
+
+// Make cursor grow on choice hover
+document.querySelectorAll('.choice-option').forEach(el => {
+  el.addEventListener('mouseenter', () => { cur.style.width='26px'; cur.style.height='26px'; });
+  el.addEventListener('mouseleave', () => { cur.style.width='14px'; cur.style.height='14px'; });
+});
+
 
 </script>
 </body>
