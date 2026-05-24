@@ -38,70 +38,151 @@ body.intro-active { overflow: hidden; }
   position: fixed;
   inset: 0;
   z-index: 8000;
-  background: #000;
+  background: #c8001a; /* P5 red */
   overflow: hidden;
 }
 
-/* Joker background template */
-#intro-bg {
+/* Diagonal stripe pattern like P5 */
+#intro-wrapper::before {
+  content: '';
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: right center;
-  opacity: 0;
-  transition: opacity 0.8s ease;
+  background: repeating-linear-gradient(
+    -55deg,
+    transparent,
+    transparent 28px,
+    rgba(0,0,0,0.07) 28px,
+    rgba(0,0,0,0.07) 56px
+  );
+  z-index: 0;
+  pointer-events: none;
 }
-#intro-bg.loaded { opacity: 1; }
 
-/* Welcome banner — centered left half of screen, slightly low */
+/* === JOKER IMAGE — slides in from right === */
+#intro-bg {
+  position: absolute;
+  right: -5%;
+  top: 0;
+  height: 100%;
+  width: 55%;
+  object-fit: cover;
+  object-position: left center;
+  z-index: 1;
+  transform: translateX(120%);
+  opacity: 0;
+}
+/* Phase 1: Joker slides in */
+#intro-bg.anim-joker {
+  animation: jokerSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes jokerSlideIn {
+  0%   { transform: translateX(120%); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateX(0);   opacity: 1; }
+}
+
+/* === DIALOGUE BANNER — P5 style wipe in === */
 #intro-banner {
   position: absolute;
-  left: 2%;
-  bottom: 38%;
-  width: clamp(320px, 52vw, 700px);
-  opacity: 0;
-  transform: translateX(-30px);
-  transition: opacity 0.6s 0.6s ease, transform 0.6s 0.6s ease;
-  pointer-events: none;
+  left: 3%;
+  top: 50%;
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+  width: clamp(280px, 42vw, 580px);
   z-index: 3;
-}
-#intro-bg.loaded ~ #intro-banner {
   opacity: 1;
-  transform: translateX(0);
+  pointer-events: none;
+}
+#intro-banner.anim-banner {
+  animation: bannerWipe 0.4s cubic-bezier(0.22,1,0.36,1) 0s forwards;
+}
+@keyframes bannerWipe {
+  0%   { transform: translateY(-50%) scaleX(0); }
+  100% { transform: translateY(-50%) scaleX(1); }
 }
 
-/* Dialogue choice box — Persona 5 style */
+/* Text typewriter overlay on top of banner */
+#intro-dialogue-text {
+  position: absolute;
+  left: 3%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  pointer-events: none;
+  width: clamp(280px, 42vw, 580px);
+  padding: 0 0 0 18%;
+  opacity: 0;
+}
+#intro-dialogue-text.anim-text {
+  animation: textFadeIn 0.1s ease 0s forwards;
+}
+@keyframes textFadeIn {
+  to { opacity: 1; }
+}
+.dialogue-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(0.7rem, 1.4vw, 1rem);
+  letter-spacing: .3em;
+  color: #000;
+  display: block;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+}
+.dialogue-name.typing {
+  animation: typeOut 0.4s steps(20, end) forwards;
+}
+@keyframes typeOut {
+  to { width: 100%; }
+}
+.dialogue-msg {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  color: #000;
+  letter-spacing: .04em;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+}
+.dialogue-msg.typing {
+  animation: typeFull 0.5s steps(22, end) forwards;
+}
+@keyframes typeFull {
+  to { width: 100%; }
+}
+
+/* === RESPONSE OPTIONS === */
 #intro-choices {
   position: absolute;
   left: 3%;
-  bottom: 10%;
+  bottom: 12%;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  z-index: 4;
+  gap: 0.7rem;
+  z-index: 5;
+  pointer-events: none;
   opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.5s 1s ease, transform 0.5s 1s ease;
 }
-#intro-bg.loaded ~ #intro-banner ~ #intro-choices {
-  opacity: 1;
-  transform: translateY(0);
+#intro-choices.anim-choices {
+  animation: choicesFadeUp 0.4s ease forwards;
+  pointer-events: all;
+}
+@keyframes choicesFadeUp {
+  0%   { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .choice-option {
   position: relative;
   display: flex;
   align-items: center;
-  width: clamp(220px, 32vw, 420px);
-  height: clamp(36px, 5.5vw, 58px);
+  width: clamp(200px, 28vw, 380px);
+  height: clamp(38px, 5vw, 56px);
   cursor: none;
   text-decoration: none;
-  transition: filter 0.15s;
 }
-
-/* The arrow shape image — black version default, white on hover */
 .choice-option .arrow-black,
 .choice-option .arrow-white {
   position: absolute;
@@ -109,11 +190,10 @@ body.intro-active { overflow: hidden; }
   width: 100%;
   height: 100%;
   object-fit: fill;
-  transition: opacity 0.15s;
+  transition: opacity 0.1s;
 }
 .choice-option .arrow-black { opacity: 1; }
 .choice-option .arrow-white { opacity: 0; }
-
 .choice-option:hover .arrow-black { opacity: 0; }
 .choice-option:hover .arrow-white { opacity: 1; }
 
@@ -121,24 +201,24 @@ body.intro-active { overflow: hidden; }
   position: relative;
   z-index: 2;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(0.85rem, 1.6vw, 1.3rem);
-  letter-spacing: .18em;
+  font-size: clamp(0.85rem, 1.5vw, 1.2rem);
+  letter-spacing: .2em;
   color: #fff;
-  padding-left: 10%;
+  padding-left: 14%;
   padding-bottom: 2px;
-  transition: color 0.15s;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+  transition: color 0.1s;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
   white-space: nowrap;
 }
 .choice-option:hover .choice-label { color: #000; text-shadow: none; }
 
-/* EXIT TRANSITION */
-#intro-wrapper.exit-left {
-  animation: introExit 0.65s cubic-bezier(0.76,0,0.24,1) forwards;
+/* === EXIT === */
+#intro-wrapper.exit-wipe {
+  animation: introExitWipe 0.55s cubic-bezier(0.76,0,0.24,1) forwards;
 }
-@keyframes introExit {
-  0%   { clip-path: inset(0 0 0 0); opacity: 1; }
-  100% { clip-path: inset(0 100% 0 0); opacity: 0.2; }
+@keyframes introExitWipe {
+  0%   { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 0 0 100%); }
 }
 
 /* ===================== HERO ===================== */
@@ -319,30 +399,32 @@ nav a:hover::after { width:100%; }
 <!-- ===== INTRO WRAPPER ===== -->
 <div id="intro-wrapper">
 
-  <!-- Joker character background -->
+  <!-- Joker character — slides in from right -->
   <img id="intro-bg" src="assets/joker template.png" alt="" />
 
-  <!-- Welcome banner (name + welcome text) -->
-  <img id="intro-banner" src="assets/Phakeo Arounerangsy-Welcome to my website.png" alt="Welcome" />
+  <!-- Welcome banner shape -->
+  <img id="intro-banner" src="assets/Phakeo Arounerangsy-Welcome to my website.png" alt="" />
+
+  <!-- Typewriter text layered on top of banner -->
+  <div id="intro-dialogue-text">
+    <span class="dialogue-name">Phakeo Arounerangsy</span>
+    <span class="dialogue-msg">Welcome to my website</span>
+  </div>
 
   <!-- Dialogue choices -->
   <div id="intro-choices">
-
-    <!-- Option 1: More about me -->
     <a href="#about" class="choice-option" id="choice-about">
       <img class="arrow-black" src="assets/response png black.png" alt="" />
       <img class="arrow-white" src="assets/response png white.png" alt="" />
       <span class="choice-label">More about me</span>
     </a>
-
-    <!-- Option 2: GitHub -->
     <a href="https://github.com/Kronomono" target="_blank" class="choice-option" id="choice-github">
       <img class="arrow-black" src="assets/response png black.png" alt="" />
       <img class="arrow-white" src="assets/response png white.png" alt="" />
       <span class="choice-label">Github</span>
     </a>
-
   </div>
+
 </div>
 <!-- ===== END INTRO ===== -->
 
@@ -568,18 +650,52 @@ document.querySelectorAll('.reveal,.exp-item').forEach(el=>obs.observe(el));
 
 
 // ===== INTRO SEQUENCE =====
-const introWrapper = document.getElementById('intro-wrapper');
-const introBg      = document.getElementById('intro-bg');
+const introWrapper  = document.getElementById('intro-wrapper');
+const introBg       = document.getElementById('intro-bg');
+const introBanner   = document.getElementById('intro-banner');
+const introText     = document.getElementById('intro-dialogue-text');
+const introChoices  = document.getElementById('intro-choices');
+const dialogueName  = document.querySelector('.dialogue-name');
+const dialogueMsg   = document.querySelector('.dialogue-msg');
 
 document.body.classList.add('intro-active');
 
-// Trigger the fade-in cascade once the bg image loads
-introBg.addEventListener('load', () => introBg.classList.add('loaded'));
-// If already cached
-if (introBg.complete) introBg.classList.add('loaded');
+function runIntroSequence() {
+  // Step 1 (0ms): Joker slides in from the right
+  introBg.classList.add('anim-joker');
+
+  // Step 2 (500ms): Banner wipes in
+  setTimeout(() => {
+    introBanner.classList.add('anim-banner');
+  }, 500);
+
+  // Step 3 (800ms): Text container fades in, then name types out
+  setTimeout(() => {
+    introText.classList.add('anim-text');
+    dialogueName.classList.add('typing');
+  }, 800);
+
+  // Step 4 (1250ms): Welcome message types out
+  setTimeout(() => {
+    dialogueMsg.classList.add('typing');
+  }, 1250);
+
+  // Step 5 (1900ms): Response choices slide up
+  setTimeout(() => {
+    introChoices.classList.add('anim-choices');
+  }, 1900);
+}
+
+// Start immediately (image may already be cached)
+if (introBg.complete && introBg.naturalWidth > 0) {
+  runIntroSequence();
+} else {
+  introBg.addEventListener('load', runIntroSequence, { once: true });
+  introBg.addEventListener('error', runIntroSequence, { once: true }); // fallback even if image missing
+}
 
 function exitIntro(cb) {
-  introWrapper.classList.add('exit-left');
+  introWrapper.classList.add('exit-wipe');
   introWrapper.addEventListener('animationend', () => {
     introWrapper.remove();
     document.body.classList.remove('intro-active');
@@ -587,7 +703,6 @@ function exitIntro(cb) {
   }, { once: true });
 }
 
-// "More about me" — slide intro out then scroll to #about
 document.getElementById('choice-about').addEventListener('click', (e) => {
   e.preventDefault();
   exitIntro(() => {
@@ -595,14 +710,12 @@ document.getElementById('choice-about').addEventListener('click', (e) => {
   });
 });
 
-// "Github" — slide intro out then open GitHub in new tab
 document.getElementById('choice-github').addEventListener('click', (e) => {
   e.preventDefault();
   window.open('https://github.com/Kronomono', '_blank');
   exitIntro();
 });
 
-// Make cursor grow on choice hover
 document.querySelectorAll('.choice-option').forEach(el => {
   el.addEventListener('mouseenter', () => { cur.style.width='26px'; cur.style.height='26px'; });
   el.addEventListener('mouseleave', () => { cur.style.width='14px'; cur.style.height='14px'; });
