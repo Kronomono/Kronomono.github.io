@@ -35,50 +35,46 @@ body::after { content:'';position:fixed;inset:0;background-image:url("data:image
   inset: 0;
   z-index: 800;
   pointer-events: none;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  padding: 0 0 6vh 4vw;
+  overflow: hidden;
 }
 
+/* The actual image fills the whole screen as a dramatic diagonal slash */
 #cutin-img {
-  width: clamp(280px, 35vw, 480px);
-  /* Remove green screen via mix-blend-mode + CSS filter trick */
-  mix-blend-mode: multiply;
-  filter: 
-    /* Knock out the bright green */
-    hue-rotate(0deg)
-    saturate(1);
-  /* We'll use a canvas-processed version instead — see JS */
+  position: absolute;
+  /* Stretch across full screen, slightly oversized so skew doesn't leave gaps */
+  width: 130vw;
+  height: 100vh;
+  left: -15vw;
+  top: 0;
+  object-fit: cover;
+  object-position: center;
   opacity: 0;
-  transform: translateX(-120%) skewX(-6deg);
-  transition: opacity 0s, transform 0s;
+  transform: translateX(-110%) skewX(-12deg);
   pointer-events: none;
-  image-rendering: auto;
 }
 
 /* State: visible */
 #cutin-overlay.show #cutin-img {
-  animation: cutInAnim 1.4s ease forwards;
+  animation: cutInAnim 1.6s cubic-bezier(0.16,1,0.3,1) forwards;
 }
 
 /* State: hiding */
 #cutin-overlay.hide #cutin-img {
-  animation: cutOutAnim 0.35s ease forwards;
+  animation: cutOutAnim 0.4s ease forwards;
 }
 
 @keyframes cutInAnim {
-  0%   { opacity:0; transform: translateX(-120%) skewX(-6deg); }
-  15%  { opacity:1; transform: translateX(4%) skewX(-4deg); }
-  22%  { transform: translateX(-2%) skewX(-2deg); }
-  30%  { opacity:1; transform: translateX(0%) skewX(0deg); }
-  70%  { opacity:1; transform: translateX(0%) skewX(0deg); }
-  100% { opacity:0; transform: translateX(0%) skewX(0deg); }
+  0%   { opacity:0;  transform: translateX(-110%) skewX(-12deg); }
+  12%  { opacity:1;  transform: translateX(3%)    skewX(-8deg); }
+  20%  { opacity:1;  transform: translateX(-1%)   skewX(-6deg); }
+  28%  { opacity:1;  transform: translateX(0%)    skewX(-6deg); }
+  68%  { opacity:1;  transform: translateX(0%)    skewX(-6deg); }
+  100% { opacity:0;  transform: translateX(0%)    skewX(-6deg); }
 }
 
 @keyframes cutOutAnim {
-  0%   { opacity:1; transform: translateX(0); }
-  100% { opacity:0; transform: translateX(-80%) skewX(-8deg); }
+  0%   { opacity:1; transform: translateX(0%)   skewX(-6deg); }
+  100% { opacity:0; transform: translateX(110%) skewX(-6deg); }
 }
 
 /* Flash effect */
@@ -89,13 +85,12 @@ body::after { content:'';position:fixed;inset:0;background-image:url("data:image
   z-index: 799;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.05s;
 }
 #cutin-flash.flash {
-  animation: flashAnim 0.25s ease forwards;
+  animation: flashAnim 0.3s ease forwards;
 }
 @keyframes flashAnim {
-  0%   { opacity: 0.6; }
+  0%   { opacity: 0.85; }
   100% { opacity: 0; }
 }
 
@@ -267,7 +262,7 @@ nav a:hover::after { width:100%; }
   .about-grid { grid-template-columns:1fr; }
   nav { gap:1rem;padding:1rem; }
   nav a { font-size:.75rem; }
-  #cutin-img { width: clamp(200px, 60vw, 320px); }
+  #cutin-img { width: 150vw; left: -25vw; }
 }
 </style>
 </head>
