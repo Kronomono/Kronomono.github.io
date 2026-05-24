@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phakeo Arounerangsy // Phantom Coder</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Bebas+Neue&family=Share+Tech+Mono&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #e8001c;
+    --dark-red: #9b0014;
+    --black: #0a0a0a;
+    --white: #f0ece0;
+    --yellow: #ffd700;
+    --gray: #1a1a1a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 16px; height: 16px;
+    background: var(--red);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, width 0.2s, height 0.2s, background 0.2s;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 2px solid var(--red);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: all 0.15s ease;
+    mix-blend-mode: difference;
+  }
+
+  /* ===== NOISE OVERLAY ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* ===== HERO ===== */
+  #hero {
+    min-height: 100vh;
+    background: var(--red);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  #hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      rgba(0,0,0,0.07) 10px,
+      rgba(0,0,0,0.07) 20px
+    );
+  }
+
+  .hero-bg-gif {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.15;
+    mix-blend-mode: multiply;
+  }
+
+  .hero-logo-img {
+    width: min(380px, 80vw);
+    position: relative;
+    z-index: 2;
+    animation: logoEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    filter: drop-shadow(0 0 40px rgba(0,0,0,0.5));
+  }
+
+  @keyframes logoEntrance {
+    from { opacity: 0; transform: scale(0.6) rotate(-10deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  .hero-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 8rem);
+    letter-spacing: 0.05em;
+    color: var(--black);
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    line-height: 0.9;
+    margin-top: 0.5rem;
+    animation: slideUp 1s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    color: var(--black);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 2;
+    margin-top: 0.8rem;
+    animation: slideUp 1s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    animation: fadeIn 1s 1.5s both;
+    color: var(--black);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+  }
+
+  .scroll-arrow {
+    width: 20px; height: 20px;
+    border-right: 2px solid var(--black);
+    border-bottom: 2px solid var(--black);
+    transform: rotate(45deg);
+    animation: bounce 1.5s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: rotate(45deg) translateY(0); }
+    50% { transform: rotate(45deg) translateY(6px); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ===== SECTION BASE ===== */
+  section {
+    padding: 5rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 1;
+    color: var(--red);
+    letter-spacing: 0.05em;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .section-label::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: var(--red);
+    margin-top: 0.5rem;
+  }
+
+  /* ===== ABOUT ===== */
+  #about {
+    background: var(--black);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .about-img-wrap {
+    position: relative;
+  }
+
+  .about-img-wrap img {
+    width: 100%;
+    max-width: 480px;
+    display: block;
+    border: 4px solid var(--red);
+    filter: contrast(1.1);
+  }
+
+  .about-img-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -8px -8px 8px 8px;
+    border: 2px solid var(--red);
+    opacity: 0.4;
+    z-index: -1;
+  }
+
+  .about-text p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #c8c4b0;
+    margin-bottom: 1.5rem;
+  }
+
+  .phantom-tag {
+    display: inline-block;
+    background: var(--red);
+    color: var(--white);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    padding: 0.3rem 1rem;
+    margin-bottom: 1rem;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  }
+
+  /* ===== SKILLS ===== */
+  #skills {
+    background: var(--gray);
+    max-width: 100%;
+  }
+
+  .skills-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .skill-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  .skill-card {
+    background: var(--black);
+    border: 1px solid rgba(232,0,28,0.3);
+    padding: 2rem;
+    position: relative;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  }
+
+  .skill-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--red);
+  }
+
+  .skill-card::before {
+    content: attr(data-num);
+    position: absolute;
+    top: 1rem; right: 1.2rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: rgba(232,0,28,0.08);
+    line-height: 1;
+  }
+
+  .skill-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--red);
+    letter-spacing: 0.15em;
+    margin-bottom: 1rem;
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid rgba(232,0,28,0.5);
+    color: #c8c4b0;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+
+  .tag:hover {
+    background: var(--red);
+    color: var(--white);
+    border-color: var(--red);
+  }
+
+  /* ===== EXPERIENCE ===== */
+  #experience {
+    background: var(--black);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 3rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--red), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 3.5rem;
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideRight 0.6s ease forwards;
+  }
+
+  .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+  .timeline-item:nth-child(2) { animation-delay: 0.3s; }
+  .timeline-item:nth-child(3) { animation-delay: 0.5s; }
+
+  @keyframes slideRight {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -3.4rem;
+    top: 0.4rem;
+    width: 14px; height: 14px;
+    background: var(--red);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  .job-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--white);
+    letter-spacing: 0.08em;
+  }
+
+  .job-company {
+    color: var(--red);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .job-date {
+    color: #666;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 1rem;
+  }
+
+  .job-bullets {
+    list-style: none;
+    padding: 0;
+  }
+
+  .job-bullets li {
+    font-size: 0.9rem;
+    color: #a0a090;
+    padding: 0.4rem 0;
+    padding-left: 1.2rem;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .job-bullets li::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    color: var(--red);
+    font-size: 0.6rem;
+    top: 0.6rem;
+  }
+
+  /* ===== PROJECTS ===== */
+  #projects {
+    background: var(--gray);
+  }
+
+  .projects-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+
+  .project-card {
+    background: var(--black);
+    padding: 2rem;
+    border-bottom: 3px solid var(--red);
+    position: relative;
+    transition: transform 0.3s ease;
+    overflow: hidden;
+  }
+
+  .project-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--red);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    opacity: 0.04;
+    z-index: 0;
+  }
+
+  .project-card:hover::after { transform: translateY(0); }
+  .project-card:hover { transform: translateY(-4px); }
+
+  .project-card * { position: relative; z-index: 1; }
+
+  .project-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    color: rgba(232,0,28,0.12);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: var(--white);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+  }
+
+  .project-desc {
+    font-size: 0.85rem;
+    color: #888;
+    line-height: 1.7;
+  }
+
+  /* ===== CONTACT ===== */
+  #contact {
+    background: var(--red);
+    text-align: center;
+    padding: 6rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #contact::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 15px,
+      rgba(0,0,0,0.05) 15px,
+      rgba(0,0,0,0.05) 30px
+    );
+  }
+
+  .contact-inner { position: relative; z-index: 1; }
+
+  .contact-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 8rem);
+    color: var(--black);
+    letter-spacing: 0.05em;
+    line-height: 0.9;
+    margin-bottom: 1.5rem;
+  }
+
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .contact-link {
+    display: inline-block;
+    color: var(--black);
+    text-decoration: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+    border: 2px solid var(--black);
+    padding: 0.7rem 2rem;
+    transition: all 0.2s ease;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  }
+
+  .contact-link:hover {
+    background: var(--black);
+    color: var(--red);
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed;
+    top: 0; right: 0;
+    z-index: 500;
+    padding: 1.5rem 2rem;
+    display: flex;
+    gap: 2rem;
+    mix-blend-mode: difference;
+  }
+
+  nav a {
+    color: var(--white);
+    text-decoration: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    position: relative;
+    transition: color 0.2s;
+  }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--red);
+    transition: width 0.3s ease;
+  }
+
+  nav a:hover::after { width: 100%; }
+
+  /* ===== DIVIDER ===== */
+  .divider {
+    height: 4px;
+    background: var(--red);
+    position: relative;
+  }
+
+  .divider::before {
+    content: '◆';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--black);
+    padding: 0 1rem;
+    color: var(--red);
+    font-size: 1rem;
+  }
+
+  /* ===== GLITCH on section labels ===== */
+  .glitch {
+    position: relative;
+  }
+
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: inherit;
+    letter-spacing: inherit;
+    color: var(--red);
+  }
+
+  .glitch::before {
+    clip: rect(0, 900px, 0, 0);
+    animation: glitch1 3s infinite linear;
+    text-shadow: -2px 0 cyan;
+  }
+
+  .glitch::after {
+    clip: rect(0, 900px, 0, 0);
+    animation: glitch2 3s infinite linear;
+    text-shadow: 2px 0 var(--red);
+  }
+
+  @keyframes glitch1 {
+    0%, 90%, 100% { clip: rect(0,0,0,0); transform: translate(0); }
+    92% { clip: rect(20px, 9999px, 40px, 0); transform: translate(-3px, 0); }
+    94% { clip: rect(60px, 9999px, 80px, 0); transform: translate(3px, 0); }
+    96% { clip: rect(10px, 9999px, 30px, 0); transform: translate(-2px, 0); }
+  }
+
+  @keyframes glitch2 {
+    0%, 88%, 100% { clip: rect(0,0,0,0); transform: translate(0); }
+    90% { clip: rect(50px, 9999px, 70px, 0); transform: translate(3px, 0); }
+    93% { clip: rect(30px, 9999px, 50px, 0); transform: translate(-3px, 0); }
+    95% { clip: rect(70px, 9999px, 90px, 0); transform: translate(2px, 0); }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    #about {
+      grid-template-columns: 1fr;
+      padding: 3rem 1.5rem;
+    }
+    nav { gap: 1rem; }
+    .contact-links { flex-direction: column; align-items: center; }
+  }
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ===== PHANTOM THIEF BANNER ===== */
+  .phantom-banner {
+    background: var(--black);
+    border-top: 2px solid var(--red);
+    border-bottom: 2px solid var(--red);
+    overflow: hidden;
+    padding: 0.8rem 0;
+    white-space: nowrap;
+  }
+
+  .phantom-ticker {
+    display: inline-flex;
+    animation: ticker 20s linear infinite;
+    gap: 4rem;
+  }
+
+  .phantom-ticker span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.3em;
+    color: var(--red);
+  }
+
+  .phantom-ticker span.sep {
+    color: #333;
+  }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* GIF section */
+  .joker-gif-wrap {
+    position: absolute;
+    right: -2rem;
+    bottom: 0;
+    height: 80%;
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .joker-gif-wrap img {
+    height: 100%;
+    object-fit: contain;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="#about">About</a>
+  <a href="#skills">Skills</a>
+  <a href="#experience">Experience</a>
+  <a href="#projects">Projects</a>
+  <a href="#contact">Contact</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <img
+    src="https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+    alt=""
+    class="hero-bg-gif"
+    onerror="this.style.display='none'"
+  />
+  <img
+    src="https://upload.wikimedia.org/wikipedia/en/b/b5/Persona_5_Logo.png"
+    alt="Persona 5 Logo"
+    class="hero-logo-img"
+    onerror="this.src=''; this.alt='TAKE YOUR HEART'; this.style.fontFamily='Bebas Neue,sans-serif'; this.style.fontSize='4rem'; this.style.color='#0a0a0a';"
+  />
+  <h1 class="hero-name">Phakeo<br>Arounerangsy</h1>
+  <p class="hero-sub">Software Engineer &nbsp;|&nbsp; Phantom Coder &nbsp;|&nbsp; URI CS '24</p>
+  <div class="hero-scroll">
+    <span>SCROLL DOWN</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="phantom-banner">
+  <div class="phantom-ticker">
+    <span>SOFTWARE ENGINEER</span><span class="sep">◆</span>
+    <span>AI DEVELOPER</span><span class="sep">◆</span>
+    <span>PHANTOM CODER</span><span class="sep">◆</span>
+    <span>FULL STACK</span><span class="sep">◆</span>
+    <span>LLM &amp; RAG</span><span class="sep">◆</span>
+    <span>URI CS '24</span><span class="sep">◆</span>
+    <span>TAKE YOUR HEART</span><span class="sep">◆</span>
+    <span>SOFTWARE ENGINEER</span><span class="sep">◆</span>
+    <span>AI DEVELOPER</span><span class="sep">◆</span>
+    <span>PHANTOM CODER</span><span class="sep">◆</span>
+    <span>FULL STACK</span><span class="sep">◆</span>
+    <span>LLM &amp; RAG</span><span class="sep">◆</span>
+    <span>URI CS '24</span><span class="sep">◆</span>
+    <span>TAKE YOUR HEART</span><span class="sep">◆</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section>
+<div id="about">
+  <div class="about-img-wrap reveal">
+    <img
+      src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGo3cXM3NnF1aDFiNWZxNzYwMXZzY2Y1enp3eTNzY2xqa2F3YXozdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT9IgkDaG3nwLIGBRS/giphy.gif"
+      alt="Joker persona 5"
+      onerror="this.src='https://i.imgur.com/hPKgrGy.gif'; this.onerror=null;"
+    />
+  </div>
+  <div class="about-text reveal">
+    <div class="phantom-tag">// Codename: Joker</div>
+    <div class="section-label glitch" data-text="ABOUT">ABOUT</div>
+    <p>
+      U.S.-born software engineer and URI Computer Science graduate (GPA 3.77) based in Warwick, RI. Like any good Phantom Thief, I steal through complex problems — building AI tools, low-level communication software, and full-stack applications.
+    </p>
+    <p>
+      Specializing in AI/ML pipelines, systems programming, and bringing ideas to life through code. I don't just follow the tutorial — I build things that end up in production.
+    </p>
+    <p style="color: var(--red); font-size:0.8rem; letter-spacing:0.1em;">
+      ▶ University of Rhode Island &nbsp;|&nbsp; B.S. Computer Science &nbsp;|&nbsp; Dec 2024
+    </p>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="skills-inner">
+    <div class="section-label glitch reveal" data-text="SKILLS">SKILLS</div>
+    <div class="skill-categories">
+      <div class="skill-card reveal" data-num="01">
+        <h3>Languages</h3>
+        <div class="skill-tags">
+          <span class="tag">Python</span>
+          <span class="tag">C#</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">C++</span>
+          <span class="tag">Java</span>
+          <span class="tag">SQL</span>
+          <span class="tag">Rust</span>
+          <span class="tag">Prolog</span>
+        </div>
+      </div>
+      <div class="skill-card reveal" data-num="02">
+        <h3>AI / ML</h3>
+        <div class="skill-tags">
+          <span class="tag">LLMs</span>
+          <span class="tag">RAG Pipelines</span>
+          <span class="tag">CUDA</span>
+          <span class="tag">Hugging Face</span>
+          <span class="tag">PEFT / LoRA</span>
+          <span class="tag">Whisper ASR</span>
+          <span class="tag">HyperDB</span>
+          <span class="tag">Web Scraping</span>
+        </div>
+      </div>
+      <div class="skill-card reveal" data-num="03">
+        <h3>Tools & Systems</h3>
+        <div class="skill-tags">
+          <span class="tag">Unity</span>
+          <span class="tag">Unreal Engine</span>
+          <span class="tag">TCP/IP</span>
+          <span class="tag">Modbus</span>
+          <span class="tag">Tkinter</span>
+          <span class="tag">Discord API</span>
+          <span class="tag">Crawl4AI</span>
+          <span class="tag">MS Office</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- EXPERIENCE -->
+<section>
+<div id="experience">
+  <div class="section-label glitch reveal" data-text="EXPERIENCE">EXPERIENCE</div>
+
+  <!-- Joker gif floating -->
+  <div class="joker-gif-wrap">
+    <img
+      src="https://media.giphy.com/media/ZEobigiRBFczlRBJpB/giphy.gif"
+      alt=""
+      onerror="this.style.display='none'"
+    />
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="job-company">Data Annotation, Tech</div>
+      <div class="job-title">AI Training Data Specialist</div>
+      <div class="job-date">June 2025 — November 2025</div>
+      <ul class="job-bullets">
+        <li>Annotated and labeled large datasets (text, images, audio) with high accuracy to support ML/AI model development</li>
+        <li>Evaluated and compared outputs from multiple LLMs — assessing correctness, efficiency, and code quality</li>
+        <li>Performed QA reviews and collaborated with project leads to refine annotation guidelines</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="job-company">Rexa, Inc.</div>
+      <div class="job-title">Software Development Intern</div>
+      <div class="job-date">May 2023 — August 2023</div>
+      <ul class="job-bullets">
+        <li>Built a Python diagnostic tool for actuator communication over TCP/IP — now actively used in production</li>
+        <li>Designed a Tkinter UI for Modbus register interaction, significantly improving diagnostic speed</li>
+        <li>Collaborated with the R&amp;D engineering team on real-time data retrieval systems</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="job-company">Rexa, Inc.</div>
+      <div class="job-title">Software Development Intern (Hardware)</div>
+      <div class="job-date">May 2022 — August 2022</div>
+      <ul class="job-bullets">
+        <li>Unit testing of circuit boards and electrical sub-assemblies</li>
+        <li>Stepper and servo motor testing; assisted in actuator electronic subassembly</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="projects-inner">
+    <div class="section-label glitch reveal" data-text="PROJECTS">PROJECTS</div>
+    <div class="project-grid">
+
+      <div class="project-card reveal">
+        <div class="project-num">01</div>
+        <div class="project-name">AI Assistant</div>
+        <p class="project-desc">
+          Local AI assistant in Python using Discord as the interface. Integrated OpenAI Whisper for speech recognition, long-term memory via HyperDB, and Crawl4AI for web scraping. Deep dive into CUDA and RAG techniques.
+        </p>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-num">02</div>
+        <div class="project-name">Rexa Modbus TCP/IP Tool</div>
+        <p class="project-desc">
+          Production-grade communication software for Rexa actuator systems using Modbus protocol. Enables read/write of register values across multiple data types: integers, floats, epochs, binary, ASCII.
+        </p>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-num">03</div>
+        <div class="project-name">LoRA Fine-Tuning BERT 2.5</div>
+        <p class="project-desc">
+          Training pipeline for a small language model using Hugging Face Transformers, optimized for low-resource environments. Hands-on with transformer internals, PEFT, and inference benchmarking.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner reveal">
+    <div class="contact-title">TAKE YOUR<br>HEART</div>
+    <p style="color: var(--black); font-size: 1rem; letter-spacing: 0.2em; opacity: 0.8;">LET'S BUILD SOMETHING TOGETHER</p>
+    <div class="contact-links">
+      <a href="mailto:phakeoa@gmail.com" class="contact-link">EMAIL</a>
+      <a href="tel:4012985458" class="contact-link">CALL</a>
+    </div>
+    <p style="margin-top: 3rem; color: rgba(0,0,0,0.4); font-size: 0.75rem; letter-spacing: 0.1em;">
+      Warwick, RI &nbsp;·&nbsp; (401) 298-5458 &nbsp;·&nbsp; phakeoa@gmail.com
+    </p>
+  </div>
+</section>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '28px';
+      cursor.style.height = '28px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '16px';
+      cursor.style.height = '16px';
+    });
+  });
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  revealEls.forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
