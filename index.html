@@ -370,14 +370,122 @@
     joker.src = imgDefault;
   });
 
-  function dismiss(action) {
+  /* ---- CUT-IN OVERLAY ---- */
+  const cutinOverlay = document.createElement('div');
+  cutinOverlay.id = 'p5-cutin-overlay';
+  cutinOverlay.innerHTML = `
+    <canvas id="p5-cutin-canvas"></canvas>
+    <div id="p5-cutin-lines"></div>
+    <div id="p5-cutin-text">MORE ABOUT ME</div>
+  `;
+  document.body.appendChild(cutinOverlay);
+
+  const cutinStyles = document.createElement('style');
+  cutinStyles.textContent = `
+    #p5-cutin-overlay {
+      position: fixed; inset: 0; z-index: 20000;
+      background: #000;
+      display: none; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    #p5-cutin-overlay.active { display: flex; }
+    #p5-cutin-canvas { display: none; }
+    #p5-cutin-gif {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+    #p5-cutin-lines {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(-45deg,transparent,transparent 18px,rgba(232,0,28,0.07) 18px,rgba(232,0,28,0.07) 36px);
+      pointer-events: none;
+      animation: cutinLinesFade 0.3s 0.1s both;
+    }
+    #p5-cutin-text {
+      position: absolute;
+      bottom: 12%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 6vw, 4.5rem);
+      letter-spacing: 0.5em;
+      color: #e8001c;
+      text-shadow: 0 0 40px rgba(232,0,28,0.8), 0 0 80px rgba(232,0,28,0.4);
+      white-space: nowrap;
+      opacity: 0;
+      animation: none;
+    }
+    #p5-cutin-text.show {
+      animation: cutinTextReveal 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes cutinTextReveal {
+      from { opacity:0; letter-spacing:1em; filter:blur(8px); }
+      to   { opacity:1; letter-spacing:0.5em; filter:blur(0); }
+    }
+    @keyframes cutinLinesFade {
+      from { opacity:0; } to { opacity:1; }
+    }
+  `;
+  document.head.appendChild(cutinStyles);
+
+  function playCutIn(onDone) {
+    const overlay = document.getElementById('p5-cutin-overlay');
+    const textEl  = document.getElementById('p5-cutin-text');
+
+    // Flash on entry
     flash.style.opacity = '1';
-    setTimeout(() => { flash.style.opacity = '0'; }, 120);
+    setTimeout(() => { flash.style.opacity = '0'; }, 80);
+
+    // Use GIF with mix-blend-mode:screen — black becomes transparent
+    const gif = document.createElement('img');
+    gif.id = 'p5-cutin-gif';
+    gif.src = 'assets/ezgif_com-animated-gif-maker.gif?t=' + Date.now();
+    gif.alt = '';
+    overlay.appendChild(gif);
+    overlay.classList.add('active');
+
+    // Show text 800ms in — adjust to match your GIF's action peak
+    const textTimer = setTimeout(() => {
+      textEl.classList.add('show');
+    }, 800);
+
+    // ← Set this to your GIF's actual duration in milliseconds
+    const GIF_DURATION_MS = 1000;
+
     setTimeout(() => {
-      intro.classList.add('exit');
-      setTimeout(() => { intro.style.display = 'none'; }, 500);
-      if (action === 'github') window.open('https://github.com/phakeoA', '_blank');
-    }, 180);
+      clearTimeout(textTimer);
+      flash.style.opacity = '1';
+      setTimeout(() => { flash.style.opacity = '0'; }, 80);
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        textEl.classList.remove('show');
+        gif.remove();
+        onDone();
+      }, 120);
+    }, GIF_DURATION_MS);
+  }
+
+  function dismiss(action) {
+    if (action === 'github') {
+      flash.style.opacity = '1';
+      setTimeout(() => { flash.style.opacity = '0'; }, 120);
+      setTimeout(() => {
+        intro.classList.add('exit');
+        setTimeout(() => { intro.style.display = 'none'; }, 500);
+        window.open('https://github.com/phakeoA', '_blank');
+      }, 180);
+    } else {
+      // "More about me" — hide intro immediately, play cut-in, then fully clean up
+      intro.style.pointerEvents = 'none';
+      intro.style.display = 'none';
+      playCutIn(() => {
+        intro.classList.add('exit');
+      });
+    }
   }
 
   intro.addEventListener('click', () => {
