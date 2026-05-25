@@ -15,8 +15,8 @@ body {
 }
 
 /* CURSOR */
-.cursor { width:14px;height:14px;background:var(--red);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s; }
-.cursor-ring { width:34px;height:34px;border:2px solid var(--red);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease; }
+.cursor { width:48px;height:48px;background:url("assets/cursor_gif.gif") center/contain no-repeat;border-radius:0;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s; }
+.cursor-ring { display:none; }
 
 /* NOISE */
 body::after { content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:.6; }
