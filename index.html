@@ -9,6 +9,27 @@
 </head>
 <body>
 
+<!-- INTRO SCREEN -->
+<div id="p5-intro">
+  <div id="p5-flash"></div>
+
+  <img id="p5-joker" src="assets/joker-default.png" alt="Joker" />
+
+  <div class="p5-option" id="p5-opt-top">
+    <div class="p5-arrow"><div class="arr-outer"></div><div class="arr-inner"></div><span>More about me</span></div>
+  </div>
+  <div class="p5-option" id="p5-opt-bot">
+    <div class="p5-arrow"><div class="arr-outer"></div><div class="arr-inner"></div><span>Github</span></div>
+  </div>
+
+  <div id="p5-morgana">
+    <img src="assets/Phakeo_Arounerangsy-Welcome_to_my_website_2.png" alt="" onerror="this.style.display='none'" />
+  </div>
+
+
+  <div id="p5-cursor"></div>
+</div>
+
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
@@ -210,6 +231,146 @@
   <p class="contact-info">Warwick, RI &nbsp;·&nbsp; (401) 298-5458 &nbsp;·&nbsp; phakeoa@gmail.com</p>
 </div>
 </section>
+
+<style>
+#p5-intro {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 10000;
+  overflow: hidden;
+  cursor: none;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+}
+#p5-joker {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  object-position: right bottom;
+  pointer-events: none;
+}
+.p5-option {
+  display: none !important;
+}
+#p5-morgana {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 55%;
+  height: 38vh;
+  pointer-events: none;
+}
+#p5-morgana img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left bottom;
+}
+#p5-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.08s;
+  z-index: 10;
+}
+#p5-cursor {
+  position: absolute;
+  width: 10px; height: 10px;
+  background: #e8001c;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 20;
+}
+#p5-intro.exit {
+  animation: p5Exit 0.5s forwards;
+}
+@keyframes p5Exit {
+  0%   { opacity: 1; transform: scale(1); }
+  60%  { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+
+/* PORTRAIT — Joker covers full screen as bg, Morgana pinned bottom-left */
+@media (max-aspect-ratio: 3/4) {
+  #p5-joker {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    right: 0;
+    bottom: 0;
+  }
+  #p5-morgana {
+    width: 85%;
+    height: 25vh;
+    min-height: 160px;
+  }
+}
+</style>
+
+<script>
+(function() {
+  const intro   = document.getElementById('p5-intro');
+  const joker   = document.getElementById('p5-joker');
+  const optTop  = document.getElementById('p5-opt-top');
+  const optBot  = document.getElementById('p5-opt-bot');
+  const dot     = document.getElementById('p5-cursor');
+  const flash   = document.getElementById('p5-flash');
+
+  const imgDefault = 'assets/joker-default.png';
+  const imgHov1    = 'assets/joker-hover1.png';
+  const imgHov2    = 'assets/joker-hover2.png';
+
+  let zone = null;
+
+  intro.addEventListener('mousemove', e => {
+    dot.style.left = e.clientX + 'px';
+    dot.style.top  = e.clientY + 'px';
+
+    const mid = window.innerHeight * 0.6;
+    const newZone = e.clientY < mid ? 'top' : 'bot';
+    if (newZone === zone) return;
+    zone = newZone;
+    if (zone === 'top') {
+      optTop.classList.add('active');
+      optBot.classList.remove('active');
+      joker.src = imgHov1;
+    } else {
+      optBot.classList.add('active');
+      optTop.classList.remove('active');
+      joker.src = imgHov2;
+    }
+  });
+
+  intro.addEventListener('mouseleave', () => {
+    zone = null;
+    optTop.classList.remove('active');
+    optBot.classList.remove('active');
+    joker.src = imgDefault;
+  });
+
+  function dismiss(action) {
+    flash.style.opacity = '1';
+    setTimeout(() => { flash.style.opacity = '0'; }, 120);
+    setTimeout(() => {
+      intro.classList.add('exit');
+      setTimeout(() => { intro.style.display = 'none'; }, 500);
+      if (action === 'github') window.open('https://github.com/phakeoA', '_blank');
+    }, 180);
+  }
+
+  intro.addEventListener('click', () => {
+    if (zone === 'bot') dismiss('github');
+    else dismiss('about');
+  });
+})();
+</script>
 
 <script src="main.js"></script>
 </body>
